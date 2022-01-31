@@ -22,4 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', main.HomePage.as_view()),
     path('room/new/', main.AddRoom.as_view()),
+    path('room/delete/<int:pk>/', main.DeleteRoom.as_view()),
+    path('room/modify/<int:pk>/', main.ModifyRoom.as_view()),
 ]
