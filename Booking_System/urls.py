@@ -20,8 +20,9 @@ import main_app.views as main
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', main.HomePage.as_view()),
-    path('room/new/', main.AddRoom.as_view()),
-    path('room/delete/<int:pk>/', main.DeleteRoom.as_view()),
-    path('room/modify/<int:pk>/', main.ModifyRoom.as_view()),
+    path('', main.HomePage.as_view(), name="home-page"),
+    path('room/new/', main.AddRoom.as_view(), name="add-room"),
+    path('room/delete/<int:pk>/', main.DeleteRoom.as_view(), name="delete-room"),
+    path('room/modify/<int:pk>/', main.ModifyRoom.as_view(), name="modify-room"),
+    path('room/reserve/<int:pk>/', main.MakeReservation.as_view(), name="make-reservation"),
 ]

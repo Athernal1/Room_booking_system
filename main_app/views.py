@@ -1,14 +1,19 @@
+import datetime
+
 from django.shortcuts import render, HttpResponse, redirect
 from django.views import View
-from .models import Room
+
+from .models import Room, Reservation
 
 
 class HomePage(View):
     template_name = 'main_app/home_page.html'
+    ctx = {}
 
     def get(self, request):
         rooms = Room.objects.all()
-        return render(request, self.template_name, context = {'rooms': rooms})
+        self.ctx['rooms'] = rooms
+        return render(request, self.template_name, self.ctx)
 
 
 class AddRoom(View):
@@ -46,22 +51,25 @@ class AddRoom(View):
 
         Room.objects.create(name=name, capacity=capacity, projector=projector)
 
-        return redirect('/')
+        return redirect('home-page')
 
 
 class DeleteRoom(View):
+
     def get(self, request, pk):
         room = Room.objects.get(pk=pk)
         room.delete()
-        return redirect('/')
+        return redirect('home-page')
 
 
 class ModifyRoom(View):
     template_name = 'main_app/modify_room.html'
+    ctx ={}
 
     def get(self, request, pk):
         room = Room.objects.get(pk=pk)
-        return render(request, self.template_name, context={'room': room})
+        self.ctx['room'] = room
+        return render(request, self.template_name, self.ctx)
 
     def post(self, request, pk):
         room = Room.objects.get(pk=pk)
@@ -84,17 +92,46 @@ class ModifyRoom(View):
         if name != room.name:
             if name in all_rooms_names:
                 error = 'This name is already in use. Choose other name.'
-                return render(request, self.template_name, context = {'error': error})
+                self.ctx['error'] = error
+                return render(request, self.template_name, self.ctx)
         if not name or name == '':
             error = 'Room name can\'t be empty'
-            return render(request, self.template_name, context={'error': error})
+            self.ctx['error'] = error
+            return render(request, self.template_name, self.ctx)
         if capacity <= 0:
             error = 'Capacity can\'t be so low'
-            return render(request, self.template_name, context={'error': error})
+            self.ctx['error'] = error
+            return render(request, self.template_name, self.ctx)
 
         room.name = name
         room.capacity = capacity
         room.projector = projector
         room.save()
 
-        return redirect('/')
+        return redirect('home-page')
+
+
+class MakeReservation(View):
+    template_name = 'main_app/reservation.html'
+    ctx = {}
+
+    def get(self, request, pk):
+        room = Room.objects.get(pk=pk)
+        self.ctx['room'] = room
+        return render(request, self.template_name, self.ctx)
+
+    def post(self, request, pk):
+        room = Room.objects.get(pk=pk)
+        self.ctx['room'] = room
+        reservation_date = request.POST.get('reservation-date')
+        note = request.POST.get('comment')
+
+        if reservation_date <= str(datetime.date.today()):
+            self.ctx['error'] = "The reservation date is in the past!"
+            return render(request, self.template_name, self.ctx)
+        if Reservation.objects.filter(room=room.id, date=reservation_date):
+            self.ctx['error'] = "This room is already reserved."
+            return render(request, self.template_name, self.ctx)
+
+        Reservation.objects.create(date=reservation_date, note=note, room=room)
+        return redirect('home-page')
