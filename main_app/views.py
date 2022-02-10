@@ -135,3 +135,16 @@ class MakeReservation(View):
 
         Reservation.objects.create(date=reservation_date, note=note, room=room)
         return redirect('home-page')
+
+
+class RoomDetails(View):
+    template_name = 'main_app/room_details.html'
+    ctx = {}
+
+    def get(self, request, pk):
+        room = Room.objects.get(pk=pk)
+        reservations = room.reservation_set.filter(date__gte=str(datetime.date.today())).order_by('date')
+        self.ctx['room'] = room
+        self.ctx['reservations'] = reservations
+
+        return render(request, self.template_name, self.ctx)
