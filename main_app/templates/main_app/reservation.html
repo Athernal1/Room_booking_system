@@ -10,7 +10,6 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   <style>
     .footer {
-      position: absolute;
       bottom: 0;
       width: 100%;
       height: 60px;
@@ -68,6 +67,22 @@
 </div>
 <!-- Form error -->
 {% endif %}
+
+<!-- All reservations -->
+<div class="card">
+  <div class="card-body">
+    <h3>Reservations</h3>
+    <ul class="list-group">
+      {% for reservation in reservations %}
+      <li class="list-group-item">
+        <h4>{{ reservation.date }}</h4>
+        <p>{{ reservation.note }}</p>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+<!-- All reservations -->
 
 <!-- Footer -->
 <footer class="footer">

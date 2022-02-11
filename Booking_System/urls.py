@@ -26,4 +26,5 @@ urlpatterns = [
     path('room/modify/<int:pk>/', main.ModifyRoom.as_view(), name="modify-room"),
     path('room/reserve/<int:pk>/', main.MakeReservation.as_view(), name="make-reservation"),
     path('room/<int:pk>/', main.RoomDetails.as_view(), name="room-details"),
+    path('search/', main.Search.as_view(), name='search'),
 ]

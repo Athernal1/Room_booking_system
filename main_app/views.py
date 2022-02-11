@@ -1,6 +1,6 @@
 import datetime
 
-from django.shortcuts import render, HttpResponse, redirect
+from django.shortcuts import render, redirect
 from django.views import View
 
 from .models import Room, Reservation
@@ -120,7 +120,11 @@ class MakeReservation(View):
 
     def get(self, request, pk):
         room = Room.objects.get(pk=pk)
+        reservations = room.reservation_set.filter(date__gte=str(datetime.date.today())).order_by('date')
+
         self.ctx['room'] = room
+        self.ctx['reservations'] = reservations
+
         return render(request, self.template_name, self.ctx)
 
     def post(self, request, pk):
@@ -149,5 +153,39 @@ class RoomDetails(View):
         reservations = room.reservation_set.filter(date__gte=str(datetime.date.today())).order_by('date')
         self.ctx['room'] = room
         self.ctx['reservations'] = reservations
+
+        return render(request, self.template_name, self.ctx)
+
+
+class Search(View):
+    template_name = 'main_app/home_page.html'
+    ctx = {}
+
+    def get(self, request):
+        name = request.GET.get('room-name')
+        capacity = request.GET.get('capacity')
+        capacity = int(capacity) if capacity else 0
+        projector = request.GET.get('projector')
+
+        if projector:
+            projector = True
+        else:
+            projector = False
+
+        rooms = Room.objects.all()
+
+        if projector:
+            rooms = rooms.filter(projector=projector)
+        if capacity:
+            rooms = rooms.filter(capacity__gte=capacity)
+        if name:
+            rooms.filter(name__contains=name)
+
+        for room in rooms:
+            reservation_dates = [reservation.date for reservation in room.reservation_set.all()]
+            room.reserved = str(datetime.date.today()) not in reservation_dates
+
+        self.ctx['rooms'] = rooms
+        self.ctx['date'] = datetime.date.today()
 
         return render(request, self.template_name, self.ctx)
