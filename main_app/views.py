@@ -12,6 +12,9 @@ class HomePage(View):
 
     def get(self, request):
         rooms = Room.objects.all()
+        for room in rooms:
+            reservation_dates = [reservation.date for reservation in room.reservation_set.all()]
+            room.reserved = datetime.date.today() not in reservation_dates
         self.ctx['rooms'] = rooms
         return render(request, self.template_name, self.ctx)
 
@@ -126,7 +129,7 @@ class MakeReservation(View):
         reservation_date = request.POST.get('reservation-date')
         note = request.POST.get('comment')
 
-        if reservation_date <= str(datetime.date.today()):
+        if reservation_date < str(datetime.date.today()-datetime.timedelta(days=1)):
             self.ctx['error'] = "The reservation date is in the past!"
             return render(request, self.template_name, self.ctx)
         if Reservation.objects.filter(room=room.id, date=reservation_date):
